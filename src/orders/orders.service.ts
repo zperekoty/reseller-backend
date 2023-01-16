@@ -67,9 +67,12 @@ export class OrdersService {
 						product.name
 					}</b>!\n\n<i>🔢 Количество</i>: <b>${
 						product.amount
-					}</b>\n<i>💵 Цена за 1 единицу товара</i>: <b>${
-						product.price
-					}</b>\n<i>💰 Итого</i>: <b>₽${(
+					}</b>\n<i>💵 Цена за 1 единицу товара</i>: <b>${product.price.toLocaleString(
+						'ru-RU',
+						{
+							maximumFractionDigits: 2,
+						},
+					)}</b>\n<i>💰 Итого</i>: <b>₽${(
 						(product.price * product.amount) as number
 					).toLocaleString('ru-RU', {
 						maximumFractionDigits: 2,
@@ -86,9 +89,12 @@ export class OrdersService {
 						product.name
 					}</b>\n<i>🔢 Количество</i>: <b>${
 						product.amount
-					}</b>\n<i>💵 Цена за 1 ед</i>: <b>${
-						product.price
-					}</b>\n<i>💰 Итого</i>: <b>₽${(
+					}</b>\n<i>💵 Цена за 1 ед</i>: <b>₽${product.price.toLocaleString(
+						'ru-RU',
+						{
+							maximumFractionDigits: 2,
+						},
+					)}</b>\n<i>💰 Итого</i>: <b>₽${(
 						(product.price * product.amount) as number
 					).toLocaleString('ru-RU', {
 						maximumFractionDigits: 2,
