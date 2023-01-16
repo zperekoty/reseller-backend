@@ -72,12 +72,10 @@ export class OrdersService {
 					}</b>\n<i>💰 Итого</i>: <b>₽${(
 						(product.price * product.amount) as number
 					).toLocaleString('ru-RU', {
-						style: 'currency',
 						maximumFractionDigits: 2,
 					})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
 						(owner.data['balance'] + product.price * product.amount) as number
 					).toLocaleString('ru-RU', {
-						style: 'currency',
 						maximumFractionDigits: 2,
 					})}</b>`,
 				);
@@ -93,13 +91,11 @@ export class OrdersService {
 					}</b>\n<i>💰 Итого</i>: <b>₽${(
 						(product.price * product.amount) as number
 					).toLocaleString('ru-RU', {
-						style: 'currency',
 						maximumFractionDigits: 2,
 					})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
 						balance -
 						product.price * product.amount
 					).toLocaleString('ru-RU', {
-						style: 'currency',
 						maximumFractionDigits: 2,
 					})}</b>`,
 				);

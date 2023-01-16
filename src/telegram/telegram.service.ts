@@ -325,7 +325,6 @@ export class TelegramService {
 			}</b>\n\n<i>💵 Количество продаж</i>: <b>${buysLength}</b>\n\n\n<i>💰 Баланс</i>: <b>₽${(
 				user.data['balance'] as number
 			).toLocaleString('ru-RU', {
-				style: 'currency',
 				maximumFractionDigits: 2,
 			})}</b>`,
 		);
@@ -357,7 +356,6 @@ export class TelegramService {
 			`<i><b>ℹ️ Вы</b> уверены, что хотите удалить <b>Ваш</b> аккаунт\n\n💰 Ваш баланс: <b>₽${(
 				user.data['balance'] as number
 			).toLocaleString('ru-RU', {
-				style: 'currency',
 				maximumFractionDigits: 2,
 			})}</b></i>`,
 			Markup.keyboard(['Да 😢', 'Нет 😊'], { columns: 2 }),
