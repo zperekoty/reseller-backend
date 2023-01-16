@@ -314,7 +314,20 @@ export class TelegramService {
 		}
 
 		return await ctx.replyWithHTML(
-			`<b>🪪 ID</b>: ${user.data['id']}\n\n\n<i>ℹ️ Имя</i>: <b>${user.data['name']}</b>\n\n<i>🔐 Логин</i>: <b>${user.data['login']}</b>\n\n<i>📲 Telegram ID</i>: <b>${user.data['telegramId']}</b>\n\n<i>🛍️ Количество товаров</i>: <b>${user.data['products'].length}</b>\n\n<i>💵 Количество продаж</i>: <b>${buysLength}</b>\n\n\n<i>💰 Баланс</i>: <b>${user.data['balance']}</b>`,
+			`<b>🪪 ID</b>: ${user.data['id']}\n\n\n<i>ℹ️ Имя</i>: <b>${
+				user.data['name']
+			}</b>\n\n<i>🔐 Логин</i>: <b>${
+				user.data['login']
+			}</b>\n\n<i>📲 Telegram ID</i>: <b>${
+				user.data['telegramId']
+			}</b>\n\n<i>🛍️ Количество товаров</i>: <b>${
+				user.data['products'].length
+			}</b>\n\n<i>💵 Количество продаж</i>: <b>${buysLength}</b>\n\n\n<i>💰 Баланс</i>: <b>₽${(
+				user.data['balance'] as number
+			).toLocaleString('ru-RU', {
+				style: 'currency',
+				maximumFractionDigits: 2,
+			})}</b>`,
 		);
 	}
 
@@ -341,7 +354,12 @@ export class TelegramService {
 		await ctx.deleteMessage();
 
 		return await ctx.replyWithHTML(
-			`<i><b>ℹ️ Вы</b> уверены, что хотите удалить <b>Ваш</b> аккаунт\n\n💰 Ваш баланс: <b>${user.data['balance']}</b></i>`,
+			`<i><b>ℹ️ Вы</b> уверены, что хотите удалить <b>Ваш</b> аккаунт\n\n💰 Ваш баланс: <b>₽${(
+				user.data['balance'] as number
+			).toLocaleString('ru-RU', {
+				style: 'currency',
+				maximumFractionDigits: 2,
+			})}</b></i>`,
 			Markup.keyboard(['Да 😢', 'Нет 😊'], { columns: 2 }),
 		);
 	}

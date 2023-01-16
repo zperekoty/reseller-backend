@@ -69,11 +69,17 @@ export class OrdersService {
 						product.amount
 					}</b>\n<i>💵 Цена за 1 единицу товара</i>: <b>${
 						product.price
-					}</b>\n<i>💰 Итого</i>: <b>${
-						product.price * product.amount
-					}</b>\n\n<i>💰 Баланс</i>: <b>${
-						owner.data['balance'] + product.price * product.amount
-					}</b>`,
+					}</b>\n<i>💰 Итого</i>: <b>₽${(
+						(product.price * product.amount) as number
+					).toLocaleString('ru-RU', {
+						style: 'currency',
+						maximumFractionDigits: 2,
+					})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
+						(owner.data['balance'] + product.price * product.amount) as number
+					).toLocaleString('ru-RU', {
+						style: 'currency',
+						maximumFractionDigits: 2,
+					})}</b>`,
 				);
 
 				await this.telegramService.sendMessage(
@@ -84,11 +90,18 @@ export class OrdersService {
 						product.amount
 					}</b>\n<i>💵 Цена за 1 ед</i>: <b>${
 						product.price
-					}</b>\n<i>💰 Итого</i>: <b>${
+					}</b>\n<i>💰 Итого</i>: <b>₽${(
+						(product.price * product.amount) as number
+					).toLocaleString('ru-RU', {
+						style: 'currency',
+						maximumFractionDigits: 2,
+					})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
+						balance -
 						product.price * product.amount
-					}</b>\n\n<i>💰 Баланс</i>: <b>${
-						balance - product.price * product.amount
-					}</b>`,
+					).toLocaleString('ru-RU', {
+						style: 'currency',
+						maximumFractionDigits: 2,
+					})}</b>`,
 				);
 
 				balance -= product.price * product.amount;
