@@ -67,7 +67,7 @@ export class OrdersService {
 						product.name
 					}</b>!\n\n<i>🔢 Количество</i>: <b>${
 						product.amount
-					}</b>\n<i>💵 Цена за 1 единицу товара</i>: <b>${product.price.toLocaleString(
+					}</b>\n<i>💵 Цена за 1 единицу товара</i>: <b>₽${product.price.toLocaleString(
 						'ru-RU',
 						{
 							maximumFractionDigits: 2,
