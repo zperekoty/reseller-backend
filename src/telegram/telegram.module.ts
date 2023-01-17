@@ -17,7 +17,6 @@ const sessions = new LocalSession({ database: 'session.json' });
 			launchOptions: {
 				webhook: {
 					domain: process.env.WEBHOOK_URL,
-					port: Number(process.env.WEBHOOK_PORT),
 				},
 			},
 		}),
