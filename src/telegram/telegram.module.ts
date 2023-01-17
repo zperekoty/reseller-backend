@@ -12,13 +12,8 @@ const sessions = new LocalSession({ database: 'session.json' });
 @Module({
 	imports: [
 		TelegrafModule.forRoot({
-			middlewares: [sessions.middleware()],
 			token: process.env.BOT_TOKEN,
-			launchOptions: {
-				webhook: {
-					domain: process.env.WEBHOOK_URL,
-				},
-			},
+			middlewares: [sessions.middleware()],
 		}),
 		FirebaseModule,
 		QuickAuthModule,
