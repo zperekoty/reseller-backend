@@ -1,17 +1,18 @@
 import { Injectable } from '@nestjs/common';
 
 import { FirebaseService } from '../firebase/firebase.service';
-import { TelegramService } from '../telegram/telegram.service';
+// import { TelegramService } from '../telegram/telegram.service';
 import { Orders } from './orders.interface';
 import { FirestoreResponse } from '../firebase/response.interface';
 import { User } from '../users/user.interface';
 import { Products } from 'src/products/products.interface';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class OrdersService {
 	constructor(
 		private readonly firebaseService: FirebaseService,
-		private readonly telegramService: TelegramService,
+		private readonly httpService: HttpService, // private readonly telegramService: TelegramService,
 	) {}
 
 	async createOrder(order: Orders): Promise<FirestoreResponse<Orders>> {
@@ -61,50 +62,108 @@ export class OrdersService {
 					interface: 'users',
 				};
 
-				await this.telegramService.sendMessage(
-					owner.data['telegramId'],
-					`<i>🛍️ Покупка товара</i>: <b>${
-						product.name
-					}</b>!\n\n<i>🔢 Количество</i>: <b>${
-						product.amount
-					}</b>\n<i>💵 Цена за 1 единицу товара</i>: <b>₽${product.price.toLocaleString(
-						'ru-RU',
+				this.httpService
+					.post(
+						`https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`,
 						{
-							maximumFractionDigits: 2,
+							chat_id: owner.data['telegramId'],
+							parse_mode: 'html',
+							text: `<i>🛍️ Покупка товара</i>: <b>${
+								product.name
+							}</b>!\n\n<i>🔢 Количество</i>: <b>${
+								product.amount
+							}</b>\n<i>💵 Цена за 1 единицу товара</i>: <b>₽${product.price.toLocaleString(
+								'ru-RU',
+								{
+									maximumFractionDigits: 2,
+								},
+							)}</b>\n<i>💰 Итого</i>: <b>₽${(
+								(product.price * product.amount) as number
+							).toLocaleString('ru-RU', {
+								maximumFractionDigits: 2,
+							})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
+								(owner.data['balance'] +
+									product.price * product.amount) as number
+							).toLocaleString('ru-RU', {
+								maximumFractionDigits: 2,
+							})}</b>`,
 						},
-					)}</b>\n<i>💰 Итого</i>: <b>₽${(
-						(product.price * product.amount) as number
-					).toLocaleString('ru-RU', {
-						maximumFractionDigits: 2,
-					})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
-						(owner.data['balance'] + product.price * product.amount) as number
-					).toLocaleString('ru-RU', {
-						maximumFractionDigits: 2,
-					})}</b>`,
-				);
+					)
+					.subscribe();
 
-				await this.telegramService.sendMessage(
-					buyer.data['telegramId'],
-					`<b>😊 Спасибо за покупку</b>\n\n<i>🛍️ Название товара</i>: <b>${
-						product.name
-					}</b>\n<i>🔢 Количество</i>: <b>${
-						product.amount
-					}</b>\n<i>💵 Цена за 1 ед</i>: <b>₽${product.price.toLocaleString(
-						'ru-RU',
+				// await this.telegramService.sendMessage(
+				// 	owner.data['telegramId'],
+				// 	`<i>🛍️ Покупка товара</i>: <b>${
+				// 		product.name
+				// 	}</b>!\n\n<i>🔢 Количество</i>: <b>${
+				// 		product.amount
+				// 	}</b>\n<i>💵 Цена за 1 единицу товара</i>: <b>₽${product.price.toLocaleString(
+				// 		'ru-RU',
+				// 		{
+				// 			maximumFractionDigits: 2,
+				// 		},
+				// 	)}</b>\n<i>💰 Итого</i>: <b>₽${(
+				// 		(product.price * product.amount) as number
+				// 	).toLocaleString('ru-RU', {
+				// 		maximumFractionDigits: 2,
+				// 	})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
+				// 		(owner.data['balance'] + product.price * product.amount) as number
+				// 	).toLocaleString('ru-RU', {
+				// 		maximumFractionDigits: 2,
+				// 	})}</b>`,
+				// );
+
+				this.httpService
+					.post(
+						`https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`,
 						{
-							maximumFractionDigits: 2,
+							chat_id: buyer.data['telegramId'],
+							parse_mode: 'html',
+							text: `<b>😊 Спасибо за покупку</b>\n\n<i>🛍️ Название товара</i>: <b>${
+								product.name
+							}</b>\n<i>🔢 Количество</i>: <b>${
+								product.amount
+							}</b>\n<i>💵 Цена за 1 ед</i>: <b>₽${product.price.toLocaleString(
+								'ru-RU',
+								{
+									maximumFractionDigits: 2,
+								},
+							)}</b>\n<i>💰 Итого</i>: <b>₽${(
+								(product.price * product.amount) as number
+							).toLocaleString('ru-RU', {
+								maximumFractionDigits: 2,
+							})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
+								balance -
+								product.price * product.amount
+							).toLocaleString('ru-RU', {
+								maximumFractionDigits: 2,
+							})}</b>`,
 						},
-					)}</b>\n<i>💰 Итого</i>: <b>₽${(
-						(product.price * product.amount) as number
-					).toLocaleString('ru-RU', {
-						maximumFractionDigits: 2,
-					})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
-						balance -
-						product.price * product.amount
-					).toLocaleString('ru-RU', {
-						maximumFractionDigits: 2,
-					})}</b>`,
-				);
+					)
+					.subscribe();
+
+				// await this.telegramService.sendMessage(
+				// 	buyer.data['telegramId'],
+				// 	`<b>😊 Спасибо за покупку</b>\n\n<i>🛍️ Название товара</i>: <b>${
+				// 		product.name
+				// 	}</b>\n<i>🔢 Количество</i>: <b>${
+				// 		product.amount
+				// 	}</b>\n<i>💵 Цена за 1 ед</i>: <b>₽${product.price.toLocaleString(
+				// 		'ru-RU',
+				// 		{
+				// 			maximumFractionDigits: 2,
+				// 		},
+				// 	)}</b>\n<i>💰 Итого</i>: <b>₽${(
+				// 		(product.price * product.amount) as number
+				// 	).toLocaleString('ru-RU', {
+				// 		maximumFractionDigits: 2,
+				// 	})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
+				// 		balance -
+				// 		product.price * product.amount
+				// 	).toLocaleString('ru-RU', {
+				// 		maximumFractionDigits: 2,
+				// 	})}</b>`,
+				// );
 
 				balance -= product.price * product.amount;
 
