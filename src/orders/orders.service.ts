@@ -1,18 +1,17 @@
 import { Injectable } from '@nestjs/common';
 
 import { FirebaseService } from '../firebase/firebase.service';
-// import { TelegramService } from '../telegram/telegram.service';
+import { TelegramService } from '../telegram/telegram.service';
 import { Orders } from './orders.interface';
 import { FirestoreResponse } from '../firebase/response.interface';
 import { User } from '../users/user.interface';
 import { Products } from 'src/products/products.interface';
-import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class OrdersService {
 	constructor(
 		private readonly firebaseService: FirebaseService,
-		private readonly httpService: HttpService, // private readonly telegramService: TelegramService,
+		private readonly telegramService: TelegramService,
 	) {}
 
 	async createOrder(order: Orders): Promise<FirestoreResponse<Orders>> {
@@ -22,13 +21,13 @@ export class OrdersService {
 				order.owner,
 			);
 			let priceOfAll: number = 0;
-			let balance: number = buyer.data['balance'];
+			let balance: number = buyer.data.balance;
 
 			order.products.forEach(
 				product => (priceOfAll += product.price * product.amount),
 			);
 
-			if (buyer.data['balance'] < priceOfAll)
+			if (buyer.data.balance < priceOfAll)
 				return {
 					message: 'Ваш баланс меньше суммы товаров',
 					status: 'failure',
@@ -41,9 +40,9 @@ export class OrdersService {
 					product.id,
 				);
 
-				if (product.amount > prod.data['amount'])
+				if (product.amount > prod.data.amount)
 					return {
-						message: `Количество товара ${product.name} - ${prod.data['amount']}, вы пытаетесь заказать - ${product.amount}`,
+						message: `Количество товара ${product.name} - ${prod.data.amount}, вы пытаетесь заказать - ${product.amount}`,
 						status: 'failure',
 						error: 'Количество больше допустимого',
 					};
@@ -56,114 +55,56 @@ export class OrdersService {
 				);
 
 				const data = {
-					id: owner.data['id'],
-					buys: [product, ...owner.data['buys']],
+					id: owner.data.id,
+					buys: [product, ...owner.data.buys],
 					balance: owner.data['balance'] + product.price * product.amount,
 					interface: 'users',
 				};
 
-				this.httpService
-					.post(
-						`https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`,
+				await this.telegramService.sendMessage(
+					owner.data.telegramId,
+					`<i>🛍️ Покупка товара</i>: <b>${
+						product.name
+					}</b>!\n\n<i>🔢 Количество</i>: <b>${
+						product.amount
+					}</b>\n<i>💵 Цена за 1 единицу товара</i>: <b>₽${product.price.toLocaleString(
+						'ru-RU',
 						{
-							chat_id: owner.data['telegramId'],
-							parse_mode: 'html',
-							text: `<i>🛍️ Покупка товара</i>: <b>${
-								product.name
-							}</b>!\n\n<i>🔢 Количество</i>: <b>${
-								product.amount
-							}</b>\n<i>💵 Цена за 1 единицу товара</i>: <b>₽${product.price.toLocaleString(
-								'ru-RU',
-								{
-									maximumFractionDigits: 2,
-								},
-							)}</b>\n<i>💰 Итого</i>: <b>₽${(
-								(product.price * product.amount) as number
-							).toLocaleString('ru-RU', {
-								maximumFractionDigits: 2,
-							})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
-								(owner.data['balance'] +
-									product.price * product.amount) as number
-							).toLocaleString('ru-RU', {
-								maximumFractionDigits: 2,
-							})}</b>`,
+							maximumFractionDigits: 2,
 						},
-					)
-					.subscribe();
+					)}</b>\n<i>💰 Итого</i>: <b>₽${(
+						product.price * product.amount
+					).toLocaleString('ru-RU', {
+						maximumFractionDigits: 2,
+					})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
+						(owner.data.balance + product.price * product.amount) as number
+					).toLocaleString('ru-RU', {
+						maximumFractionDigits: 2,
+					})}</b>`,
+				);
 
-				// await this.telegramService.sendMessage(
-				// 	owner.data['telegramId'],
-				// 	`<i>🛍️ Покупка товара</i>: <b>${
-				// 		product.name
-				// 	}</b>!\n\n<i>🔢 Количество</i>: <b>${
-				// 		product.amount
-				// 	}</b>\n<i>💵 Цена за 1 единицу товара</i>: <b>₽${product.price.toLocaleString(
-				// 		'ru-RU',
-				// 		{
-				// 			maximumFractionDigits: 2,
-				// 		},
-				// 	)}</b>\n<i>💰 Итого</i>: <b>₽${(
-				// 		(product.price * product.amount) as number
-				// 	).toLocaleString('ru-RU', {
-				// 		maximumFractionDigits: 2,
-				// 	})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
-				// 		(owner.data['balance'] + product.price * product.amount) as number
-				// 	).toLocaleString('ru-RU', {
-				// 		maximumFractionDigits: 2,
-				// 	})}</b>`,
-				// );
-
-				this.httpService
-					.post(
-						`https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`,
+				await this.telegramService.sendMessage(
+					buyer.data.telegramId,
+					`<b>😊 Спасибо за покупку</b>\n\n<i>🛍️ Название товара</i>: <b>${
+						product.name
+					}</b>\n<i>🔢 Количество</i>: <b>${
+						product.amount
+					}</b>\n<i>💵 Цена за 1 ед</i>: <b>₽${product.price.toLocaleString(
+						'ru-RU',
 						{
-							chat_id: buyer.data['telegramId'],
-							parse_mode: 'html',
-							text: `<b>😊 Спасибо за покупку</b>\n\n<i>🛍️ Название товара</i>: <b>${
-								product.name
-							}</b>\n<i>🔢 Количество</i>: <b>${
-								product.amount
-							}</b>\n<i>💵 Цена за 1 ед</i>: <b>₽${product.price.toLocaleString(
-								'ru-RU',
-								{
-									maximumFractionDigits: 2,
-								},
-							)}</b>\n<i>💰 Итого</i>: <b>₽${(
-								(product.price * product.amount) as number
-							).toLocaleString('ru-RU', {
-								maximumFractionDigits: 2,
-							})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
-								balance -
-								product.price * product.amount
-							).toLocaleString('ru-RU', {
-								maximumFractionDigits: 2,
-							})}</b>`,
+							maximumFractionDigits: 2,
 						},
-					)
-					.subscribe();
-
-				// await this.telegramService.sendMessage(
-				// 	buyer.data['telegramId'],
-				// 	`<b>😊 Спасибо за покупку</b>\n\n<i>🛍️ Название товара</i>: <b>${
-				// 		product.name
-				// 	}</b>\n<i>🔢 Количество</i>: <b>${
-				// 		product.amount
-				// 	}</b>\n<i>💵 Цена за 1 ед</i>: <b>₽${product.price.toLocaleString(
-				// 		'ru-RU',
-				// 		{
-				// 			maximumFractionDigits: 2,
-				// 		},
-				// 	)}</b>\n<i>💰 Итого</i>: <b>₽${(
-				// 		(product.price * product.amount) as number
-				// 	).toLocaleString('ru-RU', {
-				// 		maximumFractionDigits: 2,
-				// 	})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
-				// 		balance -
-				// 		product.price * product.amount
-				// 	).toLocaleString('ru-RU', {
-				// 		maximumFractionDigits: 2,
-				// 	})}</b>`,
-				// );
+					)}</b>\n<i>💰 Итого</i>: <b>₽${(
+						product.price * product.amount
+					).toLocaleString('ru-RU', {
+						maximumFractionDigits: 2,
+					})}</b>\n\n<i>💰 Баланс</i>: <b>₽${(
+						balance -
+						product.price * product.amount
+					).toLocaleString('ru-RU', {
+						maximumFractionDigits: 2,
+					})}</b>`,
+				);
 
 				balance -= product.price * product.amount;
 
@@ -180,8 +121,8 @@ export class OrdersService {
 				);
 
 				const data = {
-					id: prod.data['id'],
-					amount: prod.data['amount'] - product.amount,
+					id: prod.data.id,
+					amount: prod.data.amount - product.amount,
 					interface: 'products',
 				};
 
@@ -197,9 +138,9 @@ export class OrdersService {
 			);
 
 			const data = {
-				id: buyer.data['id'],
-				orders: [_order.data['id'], ...buyer.data['orders']],
-				balance: buyer.data['balance'] - priceOfAll,
+				id: buyer.data.id,
+				orders: [_order.data.id, ...buyer.data.orders],
+				balance: buyer.data.balance - priceOfAll,
 				interface: 'users',
 			};
 

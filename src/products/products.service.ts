@@ -22,13 +22,13 @@ export class ProductsService {
 			);
 			const owner = await this.firebaseService.getById<User>(
 				'users',
-				prod.data['owner'],
+				prod.data.owner,
 			);
 
 			const data = {
-				id: owner.data['id'],
+				id: owner.data.id,
 				interface: 'users',
-				products: [prod.data['id'], ...owner.data['products']],
+				products: [prod.data.id, ...owner.data.products],
 			};
 
 			const upd = await this.firebaseService.updateDoc<User>(
@@ -76,13 +76,14 @@ export class ProductsService {
 			const prod = await this.firebaseService.getById<Products>('products', id);
 			const owner = await this.firebaseService.getById<User>(
 				'users',
-				prod.data['owner'],
+				prod.data.owner,
 			);
 
-			const list: [] = owner.data['products'].filter(p => p !== id);
+			//@ts-ignore
+			const list: [] = owner.data.products.filter(p => p !== id);
 
 			const data = {
-				id: owner.data['id'],
+				id: owner.data.id,
 				products: [...list],
 				interface: 'users',
 			};

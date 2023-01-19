@@ -16,7 +16,6 @@ import {
 import { firebaseConfig } from '../firebase.config';
 import { UidGeneratorService } from '../uid-generator/uid-generator.service';
 import { FirestoreResponse } from './response.interface';
-import { DocData } from './docdata.interface';
 import { Params } from './params.interface';
 
 @Injectable()
@@ -55,7 +54,9 @@ export class FirebaseService {
 			});
 	}
 
-	async deleteDoc<T>(path: string): Promise<FirestoreResponse<T>> {
+	async deleteDoc<T extends object>(
+		path: string,
+	): Promise<FirestoreResponse<T>> {
 		return await deleteDoc(doc(this.firestore, path))
 			.then((): FirestoreResponse<T> => {
 				return {
@@ -72,8 +73,8 @@ export class FirebaseService {
 			});
 	}
 
-	async getDocByInfAndId<T extends DocData>(
-		docData: DocData,
+	async getDocByInfAndId<T extends { id: string; interface: string }>(
+		docData: T,
 	): Promise<FirestoreResponse<T>> {
 		return await getDoc(
 			doc(this.firestore, `${docData.interface}/${docData.id}`),
@@ -101,7 +102,9 @@ export class FirebaseService {
 			});
 	}
 
-	async getDocsByInf<T>(inf: string): Promise<FirestoreResponse<T>> {
+	async getDocsByInf<T extends object>(
+		inf: string,
+	): Promise<FirestoreResponse<T>> {
 		const q = query(collection(this.firestore, inf));
 
 		return await getDocs(q)
@@ -111,7 +114,7 @@ export class FirebaseService {
 				snap.forEach(s => list.push(s.data()));
 
 				return {
-					data: list,
+					data: list as T,
 					message: `Данные из "${inf}" успешно получены`,
 					status: 'success',
 				};
@@ -125,7 +128,10 @@ export class FirebaseService {
 			});
 	}
 
-	async getById<T>(inf: string, id: string): Promise<FirestoreResponse<T>> {
+	async getById<T extends object>(
+		inf: string,
+		id: string,
+	): Promise<FirestoreResponse<T>> {
 		const q = query(collection(this.firestore, inf), where('id', '==', id));
 
 		return await getDocs(q)
@@ -145,7 +151,7 @@ export class FirebaseService {
 			});
 	}
 
-	async getDocByParams<T>(
+	async getDocByParams<T extends object>(
 		inf: string,
 		params: Params,
 	): Promise<FirestoreResponse<T>> {
@@ -171,7 +177,7 @@ export class FirebaseService {
 			});
 	}
 
-	async getDocsByParams<T>(
+	async getDocsByParams<T extends object>(
 		inf: string,
 		params: Params,
 	): Promise<FirestoreResponse<T>> {
@@ -182,12 +188,19 @@ export class FirebaseService {
 
 		return await getDocs(q)
 			.then((snap): FirestoreResponse<T> => {
+				if (snap.docs.length < 1)
+					return {
+						message: `Ошибка при получении данных из "${inf}"`,
+						status: 'failure',
+						error: 'Данные отсутствуют',
+					};
+
 				let list = [];
 
-				snap.forEach(doc => list.push(doc.data() as never));
+				snap.forEach(doc => list.push(doc.data()));
 
 				return {
-					data: [...list],
+					data: [...list] as T,
 					message: `Получены данные из "${inf}"`,
 					status: 'success',
 				};

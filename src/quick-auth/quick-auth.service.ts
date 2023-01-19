@@ -23,7 +23,7 @@ export class QuickAuthService {
 	}
 
 	async getLink(id: string): Promise<FirestoreResponse<User>> {
-		const link = await this.firebaseService.getById('qa', id);
+		const link = await this.firebaseService.getById<QuickAuth>('qa', id);
 
 		if (link.status === 'failure')
 			return {
@@ -32,13 +32,13 @@ export class QuickAuthService {
 				error: 'Ссылка не существует',
 			};
 
-		if (link.data['until'] <= new Date().getTime())
+		if (link.data.until <= new Date().getTime())
 			return {
 				message: 'Ссылка больше недоступна',
 				status: 'failure',
 				error: 'Время истекло',
 			};
 
-		return await this.firebaseService.getById('users', link.data['to']);
+		return await this.firebaseService.getById('users', link.data.to);
 	}
 }

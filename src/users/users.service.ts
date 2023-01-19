@@ -71,22 +71,20 @@ export class UsersService {
 		const link = await this.firebaseService.getDocByParams<QuickAuth>('qa', {
 			key: 'to',
 			operator: '==',
-			value: user.data['id'],
+			value: user.data.id,
 		});
 
-		for (const prod of user.data['products']) {
+		for (const prod of user.data.products) {
 			await this.firebaseService.deleteDoc<Products>(`products/${prod}`);
 		}
 
-		for (const order of user.data['orders']) {
+		for (const order of user.data.orders) {
 			await this.firebaseService.deleteDoc<Orders>(`orders/${order}`);
 		}
 
 		const del =
 			link.status === 'success'
-				? await this.firebaseService.deleteDoc<QuickAuth>(
-						`qa/${link.data['id']}`,
-				  )
+				? await this.firebaseService.deleteDoc<QuickAuth>(`qa/${link.data.id}`)
 				: '';
 
 		return await this.firebaseService.deleteDoc<User>(`users/${id}`);
@@ -113,7 +111,7 @@ export class UsersService {
 			};
 		}
 
-		if (_user.data['password'] !== user.password) {
+		if (_user.data.password !== user.password) {
 			return {
 				message: 'Неверный пароль',
 				status: 'failure',

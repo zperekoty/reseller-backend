@@ -1,0 +1,9 @@
+.idea
+dist
+node_modules
+.git
+.gitignore
+.prettierrc
+README.md
+session.json
+.env

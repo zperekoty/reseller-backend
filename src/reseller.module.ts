@@ -4,7 +4,7 @@ import { UsersModule } from './users/users.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { UidGeneratorModule } from './uid-generator/uid-generator.module';
 import { ProductsModule } from './products/products.module';
-// import { TelegramModule } from './telegram/telegram.module';
+import { TelegramModule } from './telegram/telegram.module';
 import { OrdersModule } from './orders/orders.module';
 import { QuickAuthModule } from './quick-auth/quick-auth.module';
 
@@ -16,6 +16,7 @@ import { QuickAuthModule } from './quick-auth/quick-auth.module';
 		ProductsModule,
 		OrdersModule,
 		QuickAuthModule,
+		TelegramModule,
 	],
 })
 export class ReSellerModule {}

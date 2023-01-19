@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
 
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { FirebaseModule } from '../firebase/firebase.module';
+import { TelegramModule } from '../telegram/telegram.module';
 
 @Module({
-	imports: [FirebaseModule, HttpModule],
+	imports: [FirebaseModule, TelegramModule],
 	controllers: [OrdersController],
 	providers: [OrdersService],
 })
