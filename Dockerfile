@@ -8,6 +8,6 @@ ENV PORT 4200
 
 EXPOSE ${PORT}
 
-RUN npm i && npm run build
+RUN pnpm install && pnpm build
 
-CMD ["npm", "run", "start:prod"]
+CMD ["pnpm", "start:prod"]

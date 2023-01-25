@@ -39,6 +39,8 @@ export class QuickAuthService {
 				error: 'Время истекло',
 			};
 
-		return await this.firebaseService.getById('users', link.data.to);
+		const del = await this.firebaseService.deleteDoc<QuickAuth>(`qa/${id}`);
+
+		return await this.firebaseService.getById<User>('users', link.data.to);
 	}
 }
