@@ -151,7 +151,7 @@ export class OrdersService {
 
 			return {
 				..._order,
-				message: '',
+				message: '☺️ Спасибо за покупку!',
 				status: 'success',
 			};
 		} catch {
